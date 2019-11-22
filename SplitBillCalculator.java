@@ -130,7 +130,7 @@ public class SplitBillCalculator extends Application {
 		Button btn_clear = new Button();
 		btn_clear.setText("Clear");
 		btn_clear.setOnAction(
-				event -> clearButtonClicked(bill_tf, sales_tax_tf, tip_cbo, spinner1, total_lbl, amt_per_person_lbl));
+				event -> clearButtonClicked(bill_tf, sales_tax_tf, tip_cbo, spinner1, total_lbl, amt_per_person_lbl, lbl_result));
 		btn_clear.setStyle(darkteal + ";" + white);
 
 		Button btn_exit = new Button();
@@ -203,13 +203,14 @@ public class SplitBillCalculator extends Application {
 
 	}
 
-	public void clearButtonClicked(TextField a, TextField b, ComboBox tip, Spinner s, Label total, Label perPerson) {
+	public void clearButtonClicked(TextField a, TextField b, ComboBox tip, Spinner s, Label total, Label perPerson, Label r) {
 		a.setText("");
 		b.setText("");
 		tip.setValue("-Select Tip Amount-");
 		s.getValueFactory().setValue(1);
 		total.setText("");
 		perPerson.setText("");
+		r.setText("");
 	}
 
 	public void exitButtonClicked(Stage s) {
