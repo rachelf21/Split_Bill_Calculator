@@ -182,11 +182,13 @@ public class SplitBillCalculator extends Application {
 		} catch (NumberFormatException e) {
 			l.setWrapText(true);
 			tot.setText("You have an entered an invalid amount: " + e.getMessage());
+			pp.setText("");
 			System.out.println("ERROR!\n" + e.getMessage());
 		}
 
 		catch (ArithmeticException e) {
 			tot.setText("Invalid Entry  " + e.getMessage());
+			pp.setText("");
 			System.out.println("ERROR!\n" + e.getMessage());
 		}
 
