@@ -41,7 +41,7 @@ public class SplitBillCalculator extends Application {
 		grid.setHgap(10);
 		grid.setVgap(10);
 
-		Scene scene = new Scene(grid, 340, 480);
+		Scene scene = new Scene(grid, 340, 490);
 		primaryStage.setTitle("Split Bill Calculator");
 
 		Label heading_lbl = new Label("Split Bill Calculator");
@@ -105,10 +105,15 @@ public class SplitBillCalculator extends Application {
 		// grid.add(per_person_tf, 1, 12);
 
 		HBox resultBox = new HBox(20);
-		Label lbl_result = new Label("Enter the amounts where shown.");
 		resultBox.getChildren().add(total_lbl);
-		// lbl_result.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-		grid.add(resultBox, 0, 13, 2, 1);
+		grid.add(resultBox, 0, 14, 2, 1);
+		
+		HBox resultBox3 = new HBox(20);
+		Label lbl_result = new Label("");
+		resultBox3.getChildren().add(lbl_result);
+		lbl_result.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+		grid.add(resultBox3, 0, 17, 2, 1);
+		
 
 		HBox resultBox2 = new HBox(20);
 		// Label lbl_result = new Label("Enter the amounts where shown.");
@@ -152,10 +157,11 @@ public class SplitBillCalculator extends Application {
 			String tip_string = tip.substring(0, 2);
 			if (tip_string.equals("-S")) {
 				tip_amount = 0;
+				result="No tip selected.\n";
 			}
 
 			else {
-
+				result ="";
 				tip_amount = Integer.parseInt(tip_string);
 				// split = Integer.parseInt(s);
 			}
@@ -168,8 +174,8 @@ public class SplitBillCalculator extends Application {
 				NumberFormat nf = NumberFormat.getCurrencyInstance();
 				tot.setText("TOTAL BILL: " + nf.format(final_amount));
 				pp.setText("PER PERSON: " + nf.format(per_person_amount));
-				result = "Your final amount is: " + nf.format(final_amount);
-				// l.setText(result);
+				result = result + "Thank you for dining with us today.\nHave a great day!";
+				l.setText(result);
 			} else {
 				result = "Split amount cannot be zero";
 				tot.setText(result);
@@ -177,18 +183,21 @@ public class SplitBillCalculator extends Application {
 
 			if ((split < 0) || (sales_tax < 0) || (bill_amount < 0)) {
 				tot.setText("Negative values are not allowed.");
+				result="";
 			}
 
 		} catch (NumberFormatException e) {
 			l.setWrapText(true);
 			tot.setText("You have an entered an invalid amount: " + e.getMessage());
 			pp.setText("");
-			System.out.println("ERROR!\n" + e.getMessage());
+			result="";
+			//System.out.println("ERROR!\n" + e.getMessage());
 		}
 
 		catch (ArithmeticException e) {
 			tot.setText("Invalid Entry  " + e.getMessage());
 			pp.setText("");
+			result="";
 			System.out.println("ERROR!\n" + e.getMessage());
 		}
 
