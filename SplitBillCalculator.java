@@ -4,6 +4,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.control.*;
@@ -11,20 +12,19 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.geometry.*;
 
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 
 public class SplitBillCalculator extends Application {
 
 	public double bill_amount = 0;
-	public double sales_tax = 1;
+	public double sales_tax = 0;
 	public int split = 0;
 	public double tip_amount = 0;
 	public double final_amount = 0;
 	public double per_person_amount = 0;
 	public String result = "";
 	public Font heading = new Font("Verdana", 20);
-	Color c = Color.web("0x0000FF");
+	// Color c = Color.web("0x0000FF");
 	String orange = "-fx-background-color: \"0xfcaa47\"";
 	String darkteal = "-fx-background-color: \"0x14484f\"";
 	String beige = "-fx-background-color: \"0xffd186\"";
@@ -40,31 +40,42 @@ public class SplitBillCalculator extends Application {
 		grid.setPadding(new Insets(25, 25, 25, 25));
 		grid.setHgap(10);
 		grid.setVgap(10);
+		grid.getColumnConstraints().add(new ColumnConstraints(100));
+		grid.getColumnConstraints().add(new ColumnConstraints(150));
+
+		// grid.setGridLinesVisible(true); //for testing purposes
 
 		Scene scene = new Scene(grid, 340, 490);
 		primaryStage.setTitle("Split Bill Calculator");
 
+		// ROW 0: HEADING
 		Label heading_lbl = new Label("Split Bill Calculator");
 		// heading_lbl.setFont(heading);
 		heading_lbl.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+		heading_lbl.setTextFill(Color.web("14484f"));
 
-		HBox headingBox = new HBox(15);
-		headingBox.getChildren().add(heading_lbl);
-		headingBox.setAlignment(Pos.TOP_CENTER);
-		grid.add(headingBox, 0, 0, 2, 1);
+		HBox heading_hbox = new HBox(15);
+		heading_hbox.getChildren().add(heading_lbl);
+		heading_hbox.setAlignment(Pos.TOP_CENTER);
+		grid.add(heading_hbox, 0, 0, 2, 1);
 
+		// ROW 1: CHECK AMOUNT
 		grid.add(new Label("Check Amount: "), 0, 1);
 		TextField bill_tf = new TextField();
 		bill_tf.setStyle(beige);
-		heading_lbl.setTextFill(Color.web("14484f"));
-		bill_tf.setOnAction(event -> enterAmount(bill_tf.getText()));
+		bill_tf.setText(""); // for testing purposes
+		// bill_tf.setOnAction(event -> enterAmount(bill_tf.getText()));
 		grid.add(bill_tf, 1, 1);
 
+		// ROW 2: SALES TAX
 		grid.add(new Label("Sales Tax: "), 0, 2);
 		TextField sales_tax_tf = new TextField();
 		sales_tax_tf.setStyle(beige);
+		sales_tax_tf.setText(".08875");
 		grid.add(sales_tax_tf, 1, 2);
 
+		// ROW 3: TIP COMBOBOX
+		grid.add(new Label("Tip Percent: "), 0, 3);
 		ComboBox<String> tip_cbo = new ComboBox<>();
 		tip_cbo.getItems().addAll("5%", "10%", "15%", "18%", "20%", "25%", "30%");
 		tip_cbo.setPrefWidth(150);
@@ -72,157 +83,136 @@ public class SplitBillCalculator extends Application {
 		tip_cbo.setValue("-Select Tip Amount-");
 		grid.add(tip_cbo, 1, 3);
 
-		grid.add(new Label("Tip Percent: "), 0, 3);
-		// TextField tip_cbo = new TextField();
-		// tip_cbo.setStyle(beige);
-		// grid.add(tip_cbo, 1, 3);
-
+		// ROW 4: SPLIT SPINNER
 		grid.add(new Label("Split: "), 0, 4);
-		Spinner<Integer> spinner1 = new Spinner<>(1, 10, 2);
-		spinner1.setStyle(beige);
-		spinner1.getValueFactory().setValue(1);
+		Spinner<Integer> split_spinner = new Spinner<>(1, 10, 2);
+		split_spinner.setStyle(beige);
+		split_spinner.getValueFactory().setValue(1);
+		grid.add(split_spinner, 1, 4);
 
-		// grid.add(spinner1, 1, 8, 2, 1);
-		// TextField split_tf = new TextField();
-		// split_tf.setStyle(beige);
-		grid.add(spinner1, 1,4);
-
+		// ROW 12,13: OUTPUT - Total | Amount per person | Message
 		Label total_lbl = new Label("");
-		// grid.add(total_lbl,0,10);
 		total_lbl.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
 		total_lbl.setWrapText(true);
-		// TextField total_tf = new TextField();
-		// total_tf.setStyle(beige);
-		// grid.add(total_tf, 1, 10);
-
 		Label amt_per_person_lbl = new Label("");
-		// grid.add(amt_per_person_lbl, 0, 12);
-		amt_per_person_lbl.setWrapText(true);
 		amt_per_person_lbl.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
 		amt_per_person_lbl.setWrapText(true);
-		// TextField per_person_tf = new TextField();
-		// per_person_tf.setStyle(beige);
-		// grid.add(per_person_tf, 1, 12);
 
-		HBox resultBox = new HBox(20);
-		resultBox.getChildren().add(total_lbl);
-		grid.add(resultBox, 0, 14, 2, 1);
-		
-		HBox resultBox3 = new HBox(20);
-		Label lbl_result = new Label("");
-		resultBox3.getChildren().add(lbl_result);
-		lbl_result.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-		grid.add(resultBox3, 0, 17, 2, 1);
-		
+		VBox results_vbox = new VBox(10);
+		results_vbox.getChildren().add(total_lbl);
+		results_vbox.getChildren().add(amt_per_person_lbl);
+		grid.add(results_vbox, 0, 12, 2, 1);
 
-		HBox resultBox2 = new HBox(20);
-		// Label lbl_result = new Label("Enter the amounts where shown.");
-		resultBox2.getChildren().add(amt_per_person_lbl);
-		grid.add(resultBox2, 0, 16, 2, 1);
+		HBox msg_hbox = new HBox(20);
+		Label result_lbl = new Label("");
+		msg_hbox.getChildren().add(result_lbl);
+		result_lbl.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+		msg_hbox.setAlignment(Pos.TOP_CENTER);
+		grid.add(msg_hbox, 0, 13, 2, 1);
 
-		Button btn_calc = new Button();
-		btn_calc.setText("Calculate");
-		btn_calc.setOnAction(event -> calculateButtonClicked(bill_tf.getText(), sales_tax_tf.getText(),
-				tip_cbo.getValue(), spinner1.getValue(), lbl_result, total_lbl, amt_per_person_lbl));
-		btn_calc.setStyle(darkteal + ";" + white);
-		// btn_calc.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+		// ROW 8: 3 BUTTONS
+		Button calc_btn = new Button();
+		calc_btn.setText("Calculate");
+		bill_tf.setOnAction(event -> calculateBill(bill_tf.getText(), sales_tax_tf.getText(), tip_cbo.getValue(),
+				split_spinner.getValue(), total_lbl, amt_per_person_lbl, result_lbl));
+		calc_btn.setOnAction(event -> calculateBill(bill_tf.getText(), sales_tax_tf.getText(), tip_cbo.getValue(),
+				split_spinner.getValue(), total_lbl, amt_per_person_lbl, result_lbl));
+		calc_btn.setStyle(darkteal + ";" + white);
 
-		Button btn_clear = new Button();
-		btn_clear.setText("Clear");
-		btn_clear.setOnAction(
-				event -> clearButtonClicked(bill_tf, sales_tax_tf, tip_cbo, spinner1, total_lbl, amt_per_person_lbl, lbl_result));
-		btn_clear.setStyle(darkteal + ";" + white);
+		Button clear_btn = new Button();
+		clear_btn.setText("Clear");
+		clear_btn.setOnAction(event -> clearButtonClicked(bill_tf, sales_tax_tf, tip_cbo, split_spinner, total_lbl,
+				amt_per_person_lbl, result_lbl));
+		clear_btn.setStyle(darkteal + ";" + white);
 
-		Button btn_exit = new Button();
-		btn_exit.setText("Exit");
-		btn_exit.setOnAction(event -> exitButtonClicked(primaryStage));
-		btn_exit.setStyle(darkteal + ";" + white);
+		Button exit_btn = new Button();
+		exit_btn.setText("Exit");
+		exit_btn.setOnAction(event -> exitButtonClicked(primaryStage));
+		exit_btn.setStyle(darkteal + ";" + white);
 
-		HBox buttonBox = new HBox(15);
-		buttonBox.getChildren().add(btn_calc);
-		buttonBox.getChildren().add(btn_clear);
-		buttonBox.getChildren().add(btn_exit);
-		buttonBox.setAlignment(Pos.BOTTOM_CENTER);
-		grid.add(buttonBox, 0, 8, 2, 1);
+		HBox buttons_hbox = new HBox(15);
+		buttons_hbox.getChildren().add(calc_btn);
+		buttons_hbox.getChildren().add(clear_btn);
+		buttons_hbox.getChildren().add(exit_btn);
+		buttons_hbox.setAlignment(Pos.BOTTOM_CENTER);
+		grid.add(buttons_hbox, 0, 8, 2, 1);
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
-	public void calculateButtonClicked(String b, String t, String tip, int s, Label l, Label tot, Label pp) {
+	public void calculateBill(String bill, String tax, String tip, int sp, Label total, Label pp, Label msg) {
 
 		try {
-			bill_amount = Double.parseDouble(b);
-			sales_tax = Double.parseDouble(t);
+			bill_amount = Double.parseDouble(bill);
+			sales_tax = Double.parseDouble(tax);
 			String tip_string = tip.substring(0, 2);
 			if (tip_string.equals("-S")) {
 				tip_amount = 0;
-				result="No tip selected.\n";
-			}
-
-			else {
-				result ="";
+				result = "No tip selected.\n\n";
+			} else {
+				result = "";
 				tip_amount = Integer.parseInt(tip_string);
-				// split = Integer.parseInt(s);
 			}
-			split = s;
+			split = sp;
 			final_amount = bill_amount + (bill_amount * sales_tax)
 					+ ((bill_amount + bill_amount * sales_tax) * (tip_amount * .01));
 			per_person_amount = (final_amount) / split;
 
 			if (split != 0) {
 				NumberFormat nf = NumberFormat.getCurrencyInstance();
-				tot.setText("TOTAL BILL: " + nf.format(final_amount));
+				total.setText("TOTAL BILL: " + nf.format(final_amount));
 				pp.setText("PER PERSON: " + nf.format(per_person_amount));
 				result = result + "Thank you for dining with us today.\nHave a great day!";
-				l.setText(result);
+				msg.setText(result);
 			} else {
 				result = "Split amount cannot be zero";
-				tot.setText(result);
+				total.setText("");
+				pp.setText("");
+				msg.setText(result);
 			}
 
-			if ((split < 0) || (sales_tax < 0) || (bill_amount < 0)) {
-				tot.setText("Negative values are not allowed.");
-				result="";
+			if ((bill_amount < 0) || (sales_tax < 0)) {
+				total.setText("");
+				pp.setText("");
+				result = "Negative values are not allowed.";
+				msg.setText(result);
 			}
 
 		} catch (NumberFormatException e) {
-			l.setWrapText(true);
-			tot.setText("You have an entered an invalid amount: " + e.getMessage());
+			msg.setWrapText(true);
+			total.setText("Invalid Entry");
 			pp.setText("");
-			result="";
-			//System.out.println("ERROR!\n" + e.getMessage());
+			result = "You have an entered an invalid amount. " + e.getMessage();
+			msg.setText(result);
 		}
 
 		catch (ArithmeticException e) {
-			tot.setText("Invalid Entry  " + e.getMessage());
+			msg.setWrapText(true);
+			total.setText("Invalid Entry");
 			pp.setText("");
-			result="";
-			System.out.println("ERROR!\n" + e.getMessage());
+			result = e.getMessage();
+			msg.setText(result);
 		}
-
 	}
 
-	public void clearButtonClicked(TextField a, TextField b, ComboBox tip, Spinner s, Label total, Label perPerson, Label r) {
-		a.setText("");
-		b.setText("");
+	public void clearButtonClicked(TextField bill, TextField tax, ComboBox tip, Spinner s, Label total, Label perPerson,
+			Label msg) {
+		bill.setText("");
+		tax.setText("");
 		tip.setValue("-Select Tip Amount-");
 		s.getValueFactory().setValue(1);
 		total.setText("");
 		perPerson.setText("");
-		r.setText("");
+		msg.setText("");
 	}
 
 	public void exitButtonClicked(Stage s) {
 		s.close();
-		System.out.println("Exiting...");
-
 	}
 
 	public void enterAmount(String s) {
 		double amount = Double.parseDouble(s);
-		System.out.println("Recording Amount.." + amount);
-
 	}
 
 	class DivideByZeroException extends Exception {
